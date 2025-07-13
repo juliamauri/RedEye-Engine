@@ -7,7 +7,7 @@ message(STATUS "  ENABLE_VULKAN: ${ENABLE_VULKAN}")
 
 find_package(SDL3 CONFIG REQUIRED)
 # find_package(imgui CONFIG REQUIRED)
-# find_package(PhysFS CONFIG REQUIRED)
+find_package(PhysFS CONFIG REQUIRED)
 # find_package(nfd CONFIG REQUIRED)
 # find_package(RapidJSON CONFIG REQUIRED)
 if(ENABLE_OPENGL)
@@ -24,7 +24,7 @@ target_sources(RedEye_lib
         FILES 
         # "RE_GUI.ixx"
         # "RE_GUIManager.ixx"
-        # "RE_FileSystem.ixx"
+        "RE_FileSystem.ixx"
         # "RE_EventSystem.ixx"
         "RE_WindowManager.ixx"
         # "RE_Dialogs.ixx"
@@ -43,8 +43,8 @@ target_compile_definitions(RedEye_lib PRIVATE
 
 target_link_libraries(RedEye_lib PRIVATE
         SDL3::SDL3
+        $<IF:$<TARGET_EXISTS:PhysFS::PhysFS>,PhysFS::PhysFS,PhysFS::PhysFS-static>
         # imgui::imgui
-        # $<IF:$<TARGET_EXISTS:PhysFS::PhysFS>,PhysFS::PhysFS,PhysFS::PhysFS-static>
         # nfd::nfd
         # rapidjson
         $<IF:$<BOOL:${ENABLE_OPENGL}>,OpenGL::GL,>

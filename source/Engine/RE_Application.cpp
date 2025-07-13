@@ -23,9 +23,10 @@
 #include <SDL3/SDL.h>
 #include <iostream>
 
+import FileSystem;
 import WindowManager;
 
-bool InitModules();
+bool InitModules(char* _argv[]);
 bool StartModules();
 void LoadConfig();
 void SaveConfig();
@@ -43,7 +44,7 @@ bool Application::Init(int _argc, char* _argv[])
     }
 
     std::cout << "Initializing Modules" << std::endl;
-    if (InitModules() == false)
+    if (InitModules(argv) == false)
     {
         std::cerr << "Application Init failed to Initialize Modules" << std::endl;
         SDL_Quit();
@@ -83,12 +84,18 @@ SDL_AppResult Application::Tick()
 void Application::CleanUp()
 {
     std::cout << "Quiting Application" << std::endl;
-    RE::Window::CleanUp();
     Renderer::CleanUp();
+    RE::Window::CleanUp();
+    RE::FileSystem::CleanUp();
 }
 
-bool InitModules()
+bool InitModules(char* _argv[])
 {
+    if (RE::FileSystem::Init(_argv, "RedEye", "Engine") == false)
+    {
+        std::cerr << "Failed to initialize FileSystem" << std::endl;
+        return false;
+    }
     if (RE::Window::Init() == false)
     {
         std::cerr << "Failed to initialize Window Module" << std::endl;

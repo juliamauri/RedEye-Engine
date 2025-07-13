@@ -1,6 +1,7 @@
 {
   "dependencies": [
     "gtest",
+    "physfs",
     { "name": "sdl3",
       "features": ["wayland","x11","vulkan"] }
   ]
