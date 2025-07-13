@@ -10,7 +10,7 @@ find_package(PhysFS CONFIG REQUIRED)
 find_package(nfd CONFIG REQUIRED)
 find_package(RapidJSON CONFIG REQUIRED)
 if(ENABLE_OPENGL)
-    find_package(GLEW REQUIRED)
+    find_package(OpenGL REQUIRED)
 endif()
 if(ENABLE_VULKAN)
     find_package(Vulkan REQUIRED)
@@ -41,10 +41,10 @@ target_compile_definitions(RedEye_lib PRIVATE
 )
 
 target_link_libraries(RedEye_lib PRIVATE
-    imgui::imgui
-    $<IF:$<TARGET_EXISTS:PhysFS::PhysFS>,PhysFS::PhysFS,PhysFS::PhysFS-static>
-    nfd::nfd
-    rapidjson
-    $<IF:$<BOOL:${ENABLE_OPENGL}>,GLEW::GLEW,>
-    $<IF:$<BOOL:${ENABLE_VULKAN}>,Vulkan::Vulkan,>
+        imgui::imgui
+        $<IF:$<TARGET_EXISTS:PhysFS::PhysFS>,PhysFS::PhysFS,PhysFS::PhysFS-static>
+        nfd::nfd
+        rapidjson
+        $<IF:$<BOOL:${ENABLE_OPENGL}>,OpenGL::GL,>
+        $<IF:$<BOOL:${ENABLE_VULKAN}>,Vulkan::Vulkan,>
 )

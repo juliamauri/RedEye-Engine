@@ -1,5 +1,5 @@
 # Find and link dependencies
-find_package(SDL2 CONFIG REQUIRED)
+find_package(SDL3 CONFIG REQUIRED)
 find_package(RapidJSON CONFIG REQUIRED)
 
 add_executable(Lens)
@@ -16,10 +16,9 @@ target_compile_definitions(Lens PRIVATE IMGUI_DEFINE_MATH_OPERATORS)
 
 # Link libraries
 target_link_libraries(Lens PRIVATE
-    RedEye_lib
-    $<TARGET_NAME_IF_EXISTS:SDL2::SDL2main>
-    $<IF:$<TARGET_EXISTS:SDL2::SDL2>,SDL2::SDL2,SDL2::SDL2-static>
-    rapidjson
+        RedEye_lib
+        SDL3::SDL3
+        rapidjson
 )
 
 # Define the destination directory

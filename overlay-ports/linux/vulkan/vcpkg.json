@@ -1,0 +1,7 @@
+{
+  "name": "vulkan",
+  "version-string": "0-system",
+  "description": "Meta-port that relies on the system’s libvulkan.so.*",
+  "dependencies": [ "vulkan-headers" ],
+  "license": "MIT"
+}

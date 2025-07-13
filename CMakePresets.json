@@ -32,7 +32,8 @@
       "cacheVariables": {
         "CMAKE_C_COMPILER": "gcc",
         "CMAKE_CXX_COMPILER": "g++",
-        "CMAKE_MAKE_PROGRAM": "/usr/bin/ninja"
+        "CMAKE_MAKE_PROGRAM": "/usr/bin/ninja",
+        "VCPKG_OVERLAY_PORTS": "${sourceDir}/overlay-ports/linux"
       },
       "condition": {
         "type": "equals",
