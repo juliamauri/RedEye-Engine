@@ -9,7 +9,7 @@ find_package(SDL3 CONFIG REQUIRED)
 # find_package(imgui CONFIG REQUIRED)
 find_package(PhysFS CONFIG REQUIRED)
 # find_package(nfd CONFIG REQUIRED)
-# find_package(RapidJSON CONFIG REQUIRED)
+find_package(RapidJSON CONFIG REQUIRED)
 if(ENABLE_OPENGL)
     find_package(OpenGL REQUIRED)
 endif()
@@ -28,7 +28,7 @@ target_sources(RedEye_lib
         # "RE_EventSystem.ixx"
         "RE_WindowManager.ixx"
         # "RE_Dialogs.ixx"
-        # "RE_JSON.ixx"
+        "RE_JSON.ixx"
 
         "Render/RenderAPIHandler.ixx"
         $<IF:$<BOOL:${ENABLE_OPENGL}>,Render/OpenGL.ixx,>
@@ -46,7 +46,7 @@ target_link_libraries(RedEye_lib PRIVATE
         $<IF:$<TARGET_EXISTS:PhysFS::PhysFS>,PhysFS::PhysFS,PhysFS::PhysFS-static>
         # imgui::imgui
         # nfd::nfd
-        # rapidjson
+        rapidjson
         $<IF:$<BOOL:${ENABLE_OPENGL}>,OpenGL::GL,>
         $<IF:$<BOOL:${ENABLE_VULKAN}>,Vulkan::Vulkan,>
 )

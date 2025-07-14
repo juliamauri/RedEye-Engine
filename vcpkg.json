@@ -2,6 +2,7 @@
   "dependencies": [
     "gtest",
     "physfs",
+    "rapidjson",
     { "name": "sdl3",
       "features": ["wayland","x11","vulkan"] }
   ]
