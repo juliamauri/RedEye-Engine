@@ -55,6 +55,11 @@ if(ENABLE_VULKAN)
     target_sources(RedEye_lib PUBLIC FILE_SET CXX_MODULES FILES ${VULKAN_MODULES})
 endif()
 
+# MathGeoLib
+target_include_directories(RedEye_lib PRIVATE 
+    ${CMAKE_CURRENT_SOURCE_DIR}/../External/MathGeoLib-1.5/src
+)
+
 target_compile_definitions(RedEye_lib PRIVATE
     IMGUI_DEFINE_MATH_OPERATORS
     $<IF:$<BOOL:${ENABLE_OPENGL}>,ENABLE_OPENGL,>
@@ -68,4 +73,5 @@ target_link_libraries(RedEye_lib PRIVATE
     rapidjson
     $<IF:$<BOOL:${ENABLE_OPENGL}>,GLEW::GLEW,>
     $<IF:$<BOOL:${ENABLE_VULKAN}>,Vulkan::Vulkan,>
+    MathGeoLib
 )
