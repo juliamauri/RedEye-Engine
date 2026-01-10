@@ -62,6 +62,7 @@ if(ENABLE_VULKAN)
     Render/Vulkan/Swapchain.ixx
     Render/Vulkan/PipelineDynamicStates.ixx
     Render/Vulkan/GraphicPipeline.ixx
+    Render/Vulkan/ShadingContext.ixx
     )
     target_sources(RedEye_lib PUBLIC FILE_SET CXX_MODULES FILES ${VULKAN_MODULES})
 endif()

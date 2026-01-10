@@ -28,6 +28,7 @@ export module Device;
 
 import VkDebug;
 import Surface;
+import Utility;
 
 const char* PhysicalDeviceVendor(uint32_t vendorID)
 {
@@ -440,7 +441,7 @@ export struct LogicalDevice
     uint32_t transfer_family = 0;
     uint32_t present_family = 0;
 
-    VkPhysicalDeviceMemoryProperties mem_properties;
+    VkPhysicalDeviceMemoryProperties* mem_properties = nullptr;
 
     bool Create(VkInstance instance, const Surface& surface,
                 uint8_t required_features = Feature::GEOMETRY_SHADER | Feature::TESSELLATION_SHADER |
@@ -464,7 +465,8 @@ export struct LogicalDevice
                 CorrectCreation(required_extensions))
             {
                 std::cout << "Created Logical Device from suitable Vulkan Physical Device ID: " << i << std::endl;
-                vkGetPhysicalDeviceMemoryProperties(physical_device, &mem_properties);
+                mem_properties = new VkPhysicalDeviceMemoryProperties();
+                vkGetPhysicalDeviceMemoryProperties(physical_device, mem_properties);
                 return true;
             }
         }
@@ -475,11 +477,18 @@ export struct LogicalDevice
 
     void Clear()
     {
-        if (physical_device == VK_NULL_HANDLE)
-            return;
-        
-        vkDestroyDevice(logical_device, VkDebug::Allocation());
-        logical_device = VK_NULL_HANDLE;
+        if (logical_device != VK_NULL_HANDLE)
+        {
+            vkDestroyDevice(logical_device, VkDebug::Allocation());
+            logical_device = VK_NULL_HANDLE;
+        }
+
+        physical_device = VK_NULL_HANDLE;
+        queue_setup = UNSET;
+        graphics_family = 0;
+        transfer_family = 0;
+        present_family = 0;
+        Delete::Ptr(mem_properties);
     }
 
     VkQueue GetGraphicsQueue() const

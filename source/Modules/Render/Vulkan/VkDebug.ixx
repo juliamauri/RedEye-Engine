@@ -36,7 +36,7 @@ VKAPI_ATTR VkBool32 VKAPI_CALL DebugCallback(VkDebugUtilsMessageSeverityFlagBits
 
 export namespace VkDebug
 {
-    const VkAllocationCallbacks* Allocation()
+    inline const VkAllocationCallbacks* Allocation()
     {
         return allocation_callbacks;
     }

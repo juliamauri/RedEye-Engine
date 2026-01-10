@@ -72,8 +72,6 @@ export struct Surface
 
     bool UpdateCapabilities(VkPhysicalDevice physical_device)
     {
-        // std::cout << "Updating SDL Vulkan Surface Capabilities." << std::endl;
-
         if (vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physical_device, surface, &capabilities) != VK_SUCCESS)
         {
             std::cerr << "Failed to get Vulkan Physical Device Surface Capabilities." << std::endl;

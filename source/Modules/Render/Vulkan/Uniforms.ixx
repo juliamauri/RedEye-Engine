@@ -20,69 +20,95 @@ module;
 
 #include <vulkan/vulkan.h>
 
+#include <vector>
+
 export module Uniforms;
 
 import Buffers;
+import Utility;
 
 export struct UniformCreateInfo
 {
-    void* data = nullptr;
+    const void* ptr;
     uint32_t binding = 0;
     VkDeviceSize size = 0;
-
-    template <typename T> static UniformCreateInfo From(T& data, uint32_t binding = 0)
+    VkDeviceSize offset = 0;
+    
+    template <typename T>
+    static UniformCreateInfo Empty(uint32_t binding = 0, VkDeviceSize buffer_offset = 0)
     {
-        return {&data, binding, sizeof(T)};
+        return {nullptr, binding, sizeof(T), buffer_offset};
+    }
+    template <typename T>
+    static UniformCreateInfo Empty(T& data, uint32_t binding = 0, VkDeviceSize buffer_offset = 0)
+    {
+        return {nullptr, binding, sizeof(T), buffer_offset};
+    }
+    template <typename T>
+    static UniformCreateInfo Filled(T& data, uint32_t binding = 0, VkDeviceSize buffer_offset = 0)
+    {
+        return {(void*)&data, binding, sizeof(T), buffer_offset};
     }
 };
 
 export struct Uniform
 {
-    void* data = nullptr;
     Buffer buffer{};
+    uint32_t binding = 0;
 
-    bool Create(const VkDevice logical_device, VkPhysicalDeviceMemoryProperties mem_properties,
-                const VkDescriptorPool& descriptorPool,
-                const std::vector<VkDescriptorSetLayout>& descriptor_set_layouts,
-                VkDescriptorSet& descriptor_set, UniformCreateInfo create_info, VkDeviceSize buffer_offset = 0)
+    bool Create(VkDevice logical_device, const VkPhysicalDeviceMemoryProperties* mem_properties,
+                const UniformCreateInfo& create_info)
     {
-        // Create Uniform Buffer
-        if (!buffer.Create(logical_device, mem_properties, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, create_info.size,
-                           buffer_offset) ||
-            !buffer.FillData(logical_device, data = create_info.data))
-            return false;
-
-        // Create Descriptor Set
-        VkDescriptorSetAllocateInfo allocInfo{};
-        allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-        allocInfo.descriptorPool = descriptorPool;
-        allocInfo.descriptorSetCount = static_cast<uint32_t>(descriptor_set_layouts.size());
-        allocInfo.pSetLayouts = descriptor_set_layouts.data();
-
-        if (vkAllocateDescriptorSets(logical_device, &allocInfo, &descriptor_set) != VK_SUCCESS)
-            return false;
-
-        // Update Descriptor Set
-        VkDescriptorBufferInfo bufferInfo = {buffer.id, 0, buffer.stride};
-        VkWriteDescriptorSet descriptorWrite{};
-        descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        descriptorWrite.dstSet = descriptor_set;
-        descriptorWrite.dstBinding = create_info.binding;
-        descriptorWrite.dstArrayElement = 0;
-        descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-        descriptorWrite.descriptorCount = 1;
-        descriptorWrite.pBufferInfo = &bufferInfo;
-        vkUpdateDescriptorSets(logical_device, 1, &descriptorWrite, 0, nullptr);
-        return true;
-    }
-
-    bool Update(VkDevice logical_device) const
-    {
-        return data != nullptr && buffer.FillData(logical_device, data);
+        binding = create_info.binding;
+        return 
+            buffer.CreateEmpty(logical_device, mem_properties, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, 
+                create_info.size, create_info.offset) && 
+            (create_info.ptr == nullptr || buffer.FillData(logical_device, create_info.ptr));
     }
 
     void Clear(VkDevice logical_device)
     {
         buffer.Clear(logical_device);
     }
+
+    inline bool Update(VkDevice logical_device, const void* data) const
+    {
+        return data != nullptr && buffer.FillData(logical_device, data);
+    }
+};
+
+export struct Uniforms
+{
+    std::vector<Uniform> uniforms{};
+
+    bool Create(VkDevice logical_device, const VkPhysicalDeviceMemoryProperties* mem_properties,
+                const std::vector<UniformCreateInfo>& uniform_infos)
+    {
+        auto size = uniform_infos.size();
+        uniforms.resize(size);
+
+        int iter = -1;
+        for (auto& uniform : uniforms)
+            if (!uniform.Create(logical_device, mem_properties, uniform_infos[++iter]))
+                return false;
+
+        return true;
+    }
+
+    bool Update(VkDevice logical_device, const std::vector<const void*>& ptrs) const
+    {
+        int iter = -1;
+        for (const auto& uniform : uniforms)
+        {
+            const void* ptr = ptrs[++iter];
+            if (ptr == nullptr)
+                continue;
+            if (!uniform.Update(logical_device, ptr))
+                return false;
+        }
+        return true;
+    }
+
+    Uniform& At(uint32_t index) { return uniforms.at(index); }
+    void Clear(VkDevice logical_device) { CLEAR(uniforms, &Uniform::Clear, logical_device); }
 };

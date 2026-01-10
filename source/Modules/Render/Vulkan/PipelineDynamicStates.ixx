@@ -40,7 +40,7 @@ void FillRasterizationState(VkPipelineRasterizationStateCreateInfo& create_info,
     create_info.depthClampEnable = VK_FALSE; // VK_TRUE requires enabling a GPU feature
     create_info.rasterizerDiscardEnable = VK_FALSE;
     create_info.polygonMode = VK_POLYGON_MODE_FILL;
-    create_info.cullMode = VK_CULL_MODE_BACK_BIT;
+    create_info.cullMode = VK_CULL_MODE_NONE;
     create_info.frontFace = VK_FRONT_FACE_CLOCKWISE;
 
     create_info.lineWidth = lineWidth;
@@ -87,7 +87,7 @@ export struct PipelineDynamicStates
         VkStencilFaceFlags face_mask;
         uint32_t mask; // or reference
     };
-    float depth_bounds[2] = {0.f, 1.f}; // { min, max }
+    float depth_bounds[2] = {0.f, 10.f}; // { min, max }
     StencilFaceConfig compare = {VK_STENCIL_FACE_FRONT_AND_BACK, 0xFF};
     StencilFaceConfig write = {VK_STENCIL_FACE_FRONT_AND_BACK, 0xFF};
     StencilFaceConfig reference = {VK_STENCIL_FACE_FRONT_AND_BACK, 0};
@@ -138,7 +138,8 @@ export struct PipelineDynamicStates
                                     VkPipelineViewportStateCreateInfo& viewportState,
                                     VkPipelineDepthStencilStateCreateInfo& depthStencilState,
                                     VkPipelineRasterizationStateCreateInfo& rasterizer,
-                                    VkPipelineDynamicStateCreateInfo& dynamicState, std::vector<VkDynamicState>& states)
+                                    VkPipelineDynamicStateCreateInfo& dynamicState, 
+                                    std::vector<VkDynamicState>& states)
     {
         requires_recreation = false;
 

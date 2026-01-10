@@ -48,7 +48,9 @@ export struct GraphicPipeline
     VkSemaphore imageAvailableSemaphore = VK_NULL_HANDLE;
     VkSemaphore renderFinishedSemaphore = VK_NULL_HANDLE;
 
-    bool Create(VkDevice logical_device, const PipelineShading& shading, const Surface& surface,
+    bool Create(VkDevice logical_device,
+                const PipelineShadingSpecs& pipeline_specs,
+                const Surface& surface,
                 uint32_t graphics_family, uint32_t present_family)
     {
         std::cout << "Creating Graphic Pipeline..." << std::endl;
@@ -59,8 +61,8 @@ export struct GraphicPipeline
         dynamic_state.Setup(swapchain.extent);
 
         if (!CreateRenderPass(logical_device, surface.format) ||
-            !CreatePipelineLayout(logical_device, shading.set_layouts) || 
-            !CreateGraphicsPipeline(logical_device, shading))
+            !CreatePipelineLayout(logical_device, pipeline_specs.layouts) || 
+            !CreateGraphicsPipeline(logical_device, pipeline_specs))
         {
             std::cerr << "Failed to create Graphic Pipeline." << std::endl;
             return false;
@@ -92,7 +94,8 @@ export struct GraphicPipeline
         renderFinishedSemaphore = VK_NULL_HANDLE;
     }
 
-    bool OnSurfaceCapabilitiesChanged(VkDevice logical_device, uint8_t changes, const PipelineShading& shading,
+    bool OnSurfaceCapabilitiesChanged(VkDevice logical_device, uint8_t changes,
+                                      const PipelineShadingSpecs& pipeline_specs,
                                       const Surface& surface, uint32_t graphics_family, uint32_t present_family)
     {
         std::cout << "Recreating Swapchain..." << std::endl;
@@ -109,7 +112,7 @@ export struct GraphicPipeline
             return true;
 
         std::cout << "Recreating Pipeline..." << std::endl;
-        return CreateGraphicsPipeline(logical_device, shading);
+        return CreateGraphicsPipeline(logical_device, pipeline_specs);
     }
     
     bool PrepareRender(VkDevice logical_device, uint32_t& next_swapchain_image)
@@ -183,32 +186,39 @@ export struct GraphicPipeline
         return true;
     }
 
-    bool CreatePipelineLayout(VkDevice logical_device, const std::vector<VkDescriptorSetLayout>& set_layouts)
+    bool CreatePipelineLayout(VkDevice logical_device, const std::vector<VkDescriptorSetLayout> layouts)
     {
-        std::cout << "Creating Pipeline Layout." << std::endl;
+        std::cout << "Creating Pipeline Layout from Descriptor Set Layouts: [ ";
+        for (const auto& layout : layouts) std::cout << layout << ' ';
+        std::cout << ']' << std::endl;
 
-        VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
-        pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-        pipelineLayoutInfo.setLayoutCount = static_cast<uint32_t>(set_layouts.size());
-        pipelineLayoutInfo.pSetLayouts = set_layouts.data();
-        pipelineLayoutInfo.pushConstantRangeCount = 0;
-        pipelineLayoutInfo.pPushConstantRanges = nullptr;
-
-        if (vkCreatePipelineLayout(logical_device, &pipelineLayoutInfo, VkDebug::Allocation(), &layout) !=
-            VK_SUCCESS)
+        bool valid_layouts = true;
+        for (const auto& layout : layouts) valid_layouts &= layout != VK_NULL_HANDLE;
+        if (valid_layouts)
         {
-            std::cerr << "Failed to create pipeline layout!" << std::endl;
-            return false;
+            VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
+            pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+            pipelineLayoutInfo.setLayoutCount = static_cast<uint32_t>(layouts.size());
+            pipelineLayoutInfo.pSetLayouts = layouts.data();
+            pipelineLayoutInfo.pushConstantRangeCount = 0;
+            pipelineLayoutInfo.pPushConstantRanges = nullptr;
+            valid_layouts = vkCreatePipelineLayout(logical_device, &pipelineLayoutInfo, VkDebug::Allocation(),
+                                                   &layout) == VK_SUCCESS;
         }
+        else
+            std::cerr << "One or more Shading Descriptor Set Layouts are null!" << std::endl;
 
-        return true;
+        if (!valid_layouts)
+            std::cerr << "Failed to create pipeline layout!" << std::endl;
+
+        return valid_layouts;
     }
 
-    bool CreateGraphicsPipeline(VkDevice logical_device, const PipelineShading& shading)
+    bool CreateGraphicsPipeline(VkDevice logical_device, const PipelineShadingSpecs& pipeline_specs)
     {
         std::cout << "Creating Shader Modules." << std::endl;
         std::vector<VkPipelineShaderStageCreateInfo> shader_stages{};
-        if (!shading.GetShaderStageCreateInfo(logical_device, shader_stages))
+        if (!pipeline_specs.GetShaderStageCreateInfo(logical_device, shader_stages))
         {
             std::cerr << "Failed to create shader modules!" << std::endl;
 
@@ -218,6 +228,7 @@ export struct GraphicPipeline
             return false;
         }
 
+        // Pipeline Create Info
         std::cout << "Creating Graphics Pipeline with " << shader_stages.size() << " shaders." << std::endl;
         VkGraphicsPipelineCreateInfo pipelineInfo{};
         pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
@@ -229,9 +240,9 @@ export struct GraphicPipeline
         pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
         pipelineInfo.basePipelineIndex = -1;
 
-        // Static States - VertexInput
+        // Static States - VertexInput (from shading)
         VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
-        shading.FillVertexInputStateCreateInfo(vertexInputInfo);
+        pipeline_specs.GetVertexInputCreateInfo(vertexInputInfo);
         pipelineInfo.pVertexInputState = &vertexInputInfo;
 
         // Static States - InputAssembly, Multisampling, ColorBlend
@@ -273,15 +284,15 @@ export struct GraphicPipeline
         VkPipelineDepthStencilStateCreateInfo depth_stencil{};
         VkPipelineRasterizationStateCreateInfo rasterizer{};
         VkPipelineDynamicStateCreateInfo dynamicState{};
-        std::vector<VkDynamicState> states{};
+        std::vector<VkDynamicState> dyn_states{};
         dynamic_state.PopulatePipelineCreateInfo(pipelineInfo, viewportState, depth_stencil, rasterizer, dynamicState,
-                                                 states);
+                                                 dyn_states);
 
         // Build Graphics Pipeline
         bool success = vkCreateGraphicsPipelines(logical_device, VK_NULL_HANDLE, 1, &pipelineInfo,
                                                  VkDebug::Allocation(), &pipeline) == VK_SUCCESS;
         if (!success)
-            std::cerr << "Failed to create graphics pipeline!" << std::endl;
+            std::cerr << "Vulkan failed to create graphics pipeline!" << std::endl;
 
         // Release shader Modules
         for (const auto& shader_stage : shader_stages)

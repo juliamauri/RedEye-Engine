@@ -31,6 +31,35 @@ import OpenGL;
 import Vulkan;
 #endif
 
+struct SDLContext
+{
+    SDL_Renderer* renderer = nullptr;
+
+    bool Create(SDL_Window* window)
+    {
+        renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+        return renderer != NULL;
+    }
+
+    void Delete()
+    {
+        SDL_DestroyRenderer(renderer);
+    }
+
+    void RenderTriangle()
+    {
+        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+        SDL_RenderClear(renderer);
+        SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+        SDL_RenderDrawLine(renderer, 200, 100, 100, 300);
+        SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
+        SDL_RenderDrawLine(renderer, 100, 300, 300, 300);
+        SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
+        SDL_RenderDrawLine(renderer, 300, 300, 200, 100);
+        SDL_RenderPresent(renderer);
+    }
+};
+
 struct Window
 {
     SDL_Window* ptr;
@@ -42,46 +71,15 @@ struct Window
         Vulkan
     } type;
 
-    union Context
-    {
-        struct SDLContext
-        {
-            SDL_Renderer* renderer = nullptr;
+    // no pueden estar en union porque los mapas no se inicializan bien -_-
 
-            bool Create(SDL_Window* window)
-            {
-                renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-                return renderer != NULL;
-            }
-
-            void Delete()
-            {
-                SDL_DestroyRenderer(renderer);
-            }
-
-            void RenderTriangle()
-            {
-                SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-                SDL_RenderClear(renderer);
-                SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-                SDL_RenderDrawLine(renderer, 200, 100, 100, 300);
-                SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
-                SDL_RenderDrawLine(renderer, 100, 300, 300, 300);
-                SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
-                SDL_RenderDrawLine(renderer, 300, 300, 200, 100);
-                SDL_RenderPresent(renderer);
-            }
-        } sdl;
-
+    SDLContext sdl_context{};
 #ifdef ENABLE_OPENGL
-        RE::OpenGL::Context gl;
+    RE::OpenGL::Context gl_context{};
 #endif
 #ifdef ENABLE_VULKAN
-        RE::Vulkan::Context vk;
+    RE::Vulkan::Context vk_context{};
 #endif
-        int i = 0;
-        ~Context() {}
-    } context = {0};
 
     bool CreateContext(SDL_Window* sdl_window, uint32_t flags, int w, int h)
     {
@@ -103,7 +101,7 @@ struct Window
                 return false;
 #else
                 std::cout << "Creating OpenGL context." << std::endl;
-                if (!context.gl.Create(ptr))
+                if (!gl_context.Create(ptr))
                 {
                     std::cerr << "Failed to create OpenGL context: " << SDL_GetError() << std::endl;
                     SDL_DestroyWindow(ptr);
@@ -118,7 +116,7 @@ struct Window
                 return false;
 #else
                 std::cout << "Creating Vulkan context." << std::endl;
-                if (!context.vk.Create(ptr, w, h))
+                if (!vk_context.Create(ptr, w, h))
                 {
                     std::cerr << "Failed to create Vulkan context." << std::endl;
                     SDL_DestroyWindow(ptr);
@@ -129,7 +127,7 @@ struct Window
             default:
                 std::cout << "No rendering API specified for window." << std::endl;
                 std::cout << "Creating SDL renderer." << std::endl;
-                if (!context.sdl.Create(ptr))
+                if (!sdl_context.Create(ptr))
                 {
                     std::cerr << "Failed to create SDL renderer: " << SDL_GetError() << std::endl;
                     SDL_DestroyWindow(ptr);
@@ -148,16 +146,16 @@ struct Window
         {
 #ifdef ENABLE_OPENGL
             case Window::OpenGL:
-                context.gl.Delete();
+                gl_context.Delete();
                 break;
 #endif
 #ifdef ENABLE_VULKAN
             case Window::Vulkan:
-                context.vk.Delete();
+                vk_context.Delete();
                 break;
 #endif
             default:
-                context.sdl.Delete();
+                sdl_context.Delete();
                 break;
         }
         SDL_DestroyWindow(ptr);
@@ -168,17 +166,17 @@ struct Window
         switch (type)
         {
             case SDL:
-                context.sdl.RenderTriangle();
+                sdl_context.RenderTriangle();
                 return true;
 #ifdef ENABLE_OPENGL
             case Window::OpenGL:
-                context.gl.RenderTriangle();
+                gl_context.RenderTriangle();
                 SDL_GL_SwapWindow(ptr);
                 return true;
 #endif
 #ifdef ENABLE_VULKAN
             case Window::Vulkan:
-                return context.vk.RenderTriangle();
+                return vk_context.RenderTriangle();
 #endif
             default:
                 return false;
