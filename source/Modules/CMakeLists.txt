@@ -4,11 +4,14 @@ option(ENABLE_VULKAN "Enable Vulkan support" ON)
 message(STATUS "Configuration Summary:")
 message(STATUS "  ENABLE_OPENGL: ${ENABLE_OPENGL}")
 message(STATUS "  ENABLE_VULKAN: ${ENABLE_VULKAN}")
+message(STATUS "  CMAKE_CURRENT_SOURCE_DIR: ${CMAKE_CURRENT_SOURCE_DIR}")
+message(STATUS "  CMAKE_CURRENT_BINARY_DIR: ${CMAKE_CURRENT_BINARY_DIR}")
 
 find_package(imgui CONFIG REQUIRED)
 find_package(PhysFS CONFIG REQUIRED)
 find_package(nfd CONFIG REQUIRED)
 find_package(RapidJSON CONFIG REQUIRED)
+find_package(assimp REQUIRED)
 
 if(ENABLE_OPENGL)
     find_package(GLEW REQUIRED)
@@ -29,7 +32,15 @@ target_sources(RedEye_lib
         "RE_WindowManager.ixx"
         "RE_Dialogs.ixx"
         "RE_JSON.ixx"
+
         "Render/RenderAPIHandler.ixx"
+        "Render/Utility.ixx"
+        "Render/FileSystem.ixx"
+
+        "Render/ECS/Material.ixx"
+        "Render/ECS/Mesh.ixx"
+        "Render/ECS/Camera.ixx"
+        "Render/ECS/ECS.ixx"
 )
 if(ENABLE_OPENGL)
     target_sources(RedEye_lib PUBLIC FILE_SET CXX_MODULES FILES "Render/OpenGL.ixx")
@@ -71,6 +82,7 @@ target_link_libraries(RedEye_lib PRIVATE
     $<IF:$<TARGET_EXISTS:PhysFS::PhysFS>,PhysFS::PhysFS,PhysFS::PhysFS-static>
     nfd::nfd
     rapidjson
+    assimp::assimp
     $<IF:$<BOOL:${ENABLE_OPENGL}>,GLEW::GLEW,>
     $<IF:$<BOOL:${ENABLE_VULKAN}>,Vulkan::Vulkan,>
     MathGeoLib

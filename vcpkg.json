@@ -15,6 +15,7 @@
     "nativefiledialog-extended",
     "physfs",
     "rapidjson",
+    "assimp",
     {
       "name": "sdl2",
       "features": [
