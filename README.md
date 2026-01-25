@@ -1,40 +1,17 @@
-# Red Eye ![logo](https://github.com/juliamauri/RedEye-Engine/blob/master/docs/Multimedia/favicon-32x32.png?raw=true) Engine [![Build status](https://ci.appveyor.com/api/projects/status/swrp9sgx89yxl493?svg=true)](https://ci.appveyor.com/project/cumus/redeye-engine)
+# ![logo](https://raw.githubusercontent.com/juliamauri/RedEye-Engine/refs/heads/main/docs/Multimedia/favicon-32x32.png) Red Eye Engine
 
-Red Eye is a 3D Game Engine written in C++.
-
-What’s special about it? The code was written from scratch using a total of 15 C++ libraries. We started by building a geometry loader that could render the scene with simple controls for the camera. Once the base was solid we moved on to optimize the rendering process (frustum culling and quadtrees) and resource management. For the finishing touches we:
-* Added shader pipeline with integrated editor so that shaders can be modified, compiled and updated instantly.
-* Changed quadtree for a better space partitioning algorithm: Dynamic Bound Box Tree; the same Overwatch uses.
-* Added Unity-like resource management with binary save/load for all the engines resources.
-* Added particle pipeline with physics and graphics customization.
-
-Future plans: add multi-threading and different rendering APIs such as DirectX and/or Vulkan.
+Red Eye is a 3D Game Engine written mostly from scratch. It loads and renders geometry.
+Our future plans included adding new rendering systems, supporting Linux and updating to newer C++ utilities. The weaknesses in the engine's architecture started to show when facing these challenges.
+We settled on it needing a total redesign. The new environment, free from previous constrains and built around improved systems yields the opportunity to tackle more than we previously thought possible.
+On brainstorming our next steps we find it hard to say goodbye to our engine's first repository but it must be done. RedEye now becomes a cluster of systems with the engine at its core.
+May this repository serve as a stepping stone to building crazier ideas and having fun throughout.
 
 ## Links:
+* Organization [RedEye Systems](https://github.com/RedEye-Systems)
 * Repository [Github](https://github.com/juliamauri/RedEye-Engine)
-* Webpage: https://redeye-engine.es/
+* Webpage: https://legacy.redeye-engine.es/
 * Authors: [Julià Mauri Costa](https://github.com/juliamauri) & [Rubén Sardón](https://github.com/cumus)
-* Tutor 1: [Ricard Pillosu](https://github.com/d0n3val) (9/2018-2/2019)
-* Tutor 2: [Marc Garrigó](https://github.com/markitus18) (9/2019-2/2020)
-* Tutor 3: [Lasse Löpfe](https://www.linkedin.com/in/lasse-loepfe) (2/2021-6/2021)
-* University: [CITM UPC](https://www.citm.upc.edu/)
 * License: [GNU General Public License v3.0](https://github.com/juliamauri/RedEye-Engine/blob/master/LICENSE)
-
-## Latest Version Notes
-
-### Release v5.0 Particle Pipeline
-
- * Added module phyisics: updates particle manager using fixed, timed-steps or engine par delta time.
- * Added particle emitter: stores simulation data and handles particle iteration
- * Added particle emitter gameobject component: places referenced particle emitter resource in the scene.
- * Added new particle resources:
-    * Emission: stores spawning and phyical properties
-    * Rendering: stores orientation, graphics and lighting properties
-    * Emitter: stores an emission resource and rendering resource
- * Added emitter workspace: editor window that comfortably allows modifying all the different properties of a simulation. Includes a viewport with its own camera and controls.
- * Improved GPU memory usage. Increased maximum supported rendering lights from 64 to 203 for light components and up to 508 for particle point lights.
- * Added primitive resource manager: reference counts loaded primitives
- * Added physics and rendering profiling methods to measure each system's performance.
 
 ## User Actions
 ### Shortcuts
@@ -179,6 +156,20 @@ Physics module supports running particle simulations inside a Particle Manager. 
 * gpudetect
 
 ## Previous Version Notes
+
+### Release v5.0 Particle Pipeline
+
+ * Added module phyisics: updates particle manager using fixed, timed-steps or engine par delta time.
+ * Added particle emitter: stores simulation data and handles particle iteration
+ * Added particle emitter gameobject component: places referenced particle emitter resource in the scene.
+ * Added new particle resources:
+    * Emission: stores spawning and phyical properties
+    * Rendering: stores orientation, graphics and lighting properties
+    * Emitter: stores an emission resource and rendering resource
+ * Added emitter workspace: editor window that comfortably allows modifying all the different properties of a simulation. Includes a viewport with its own camera and controls.
+ * Improved GPU memory usage. Increased maximum supported rendering lights from 64 to 203 for light components and up to 508 for particle point lights.
+ * Added primitive resource manager: reference counts loaded primitives
+ * Added physics and rendering profiling methods to measure each system's performance.
 
 ### Release v4.0 ***Big Chunky Update***
 * Graphics:
