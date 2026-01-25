@@ -33,7 +33,7 @@
   <meta property="og:site_name" content="RedEye Engine" />
 
   <meta name="Twitter:card" content="summary with large image" />
-  <meta name="Twitter:url" content="https://www.redeye-engine.es/" />
+  <meta name="Twitter:url" content="https://legacy.redeye-engine.es/" />
   <meta name="Twitter:title" content="RedEye Engine, a Video Game Development C++ Engine" />
   <meta name="Twitter:description"
     content="What’s special about RedEye Engine? The code was written from scratch using a total of 15 C++ libraries." />
@@ -46,8 +46,8 @@
             "@type": "SoftwareSourceCode",
             "name": "RedEye Engine",
             "alternateName": "Red Eye Engine",
-            "url": "https://www.redeye-engine.es/",
-            "codeRepository": "https://github.com/juliamauri/RedEye-Engine",
+            "url": "https://legacy.redeye-engine.es/",
+            "codeRepository": "https://github.com/RedEye-Systems/Legacy",
             "description": "Engine 3D(OpenGL)",
             "codeSampleType": "full (compile ready) solution",
             "programmingLanguage": "c++",
@@ -60,7 +60,7 @@
             "about": "What’s special about RedEye Engine? The code was written from scratch using a total of 15 C++ libraries. We started by building a geometry loader that could render the scene with simple controls for the camera. Once the base was solid we moved on to optimize the rendering process (frustum culling and quadtrees) and resource management. For the finishing touches we: Added shader pipeline with integrated editor so that shaders can be modified, compiled and updated instantly. Changed quadtree for a better space partitioning algorithm: Dynamic Bound Box Tree; the same Overwatch uses. Added Unity-like resource management with binary save/load for all the engines resources.",
             "abstract": "Red Eye is a 3D Game Engine written in C++ as an assignment for a university course.",
             "accessModeSufficient": ["textual", "visual"],
-            "acquireLicensePage": "https://github.com/juliamauri/RedEye-Engine/blob/master/LICENSE",
+            "acquireLicensePage": "https://github.com/RedEye-Systems/Legacy/blob/master/LICENSE",
             "video": "https://www.youtube.com/watch?v=kDCOSGXkqL4",
             "image": "https://raw.githubusercontent.com/juliamauri/RedEye-Engine/master/docs/Multimedia/thumbnail.png",
             "author": [{
@@ -85,7 +85,7 @@
 
   <nav class="navbar navbar-expand-lg navbar-dark sticky-top" style="background-color: #203F59;">
     <div class="container-fluid">
-      <a class="navbar-brand" href="https://www.redeye-engine.es/" style="color: #4ECBD9">
+      <a class="navbar-brand" href="https://legacy.redeye-engine.es/" style="color: #4ECBD9">
         <img src="../Multimedia/favicon-32x32.png" width="30" height="30" class="d-inline-block align-top" alt="">
         RedEye Engine</a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup"
@@ -95,26 +95,26 @@
       <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
           <li class="nav-item">
-            <a class="nav-link" href="https://www.redeye-engine.es/" style="color: #4ECBD9">Home</a>
+            <a class="nav-link" href="https://legacy.redeye-engine.es/" style="color: #4ECBD9">Home</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="https://www.redeye-engine.es/The-Brains/" style="color: #4ECBD9">The
+            <a class="nav-link" href="https://legacy.redeye-engine.es/The-Brains/" style="color: #4ECBD9">The
               Brains</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="https://www.redeye-engine.es/The-Entrails/" style="color: #4ECBD9">The
+            <a class="nav-link" href="https://legacy.redeye-engine.es/The-Entrails/" style="color: #4ECBD9">The
               Entrails</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="https://www.redeye-engine.es/Whats-Next/" style="color: #4ECBD9">What's Next?</a>
+            <a class="nav-link" href="https://legacy.redeye-engine.es/Whats-Next/" style="color: #4ECBD9">What's Next?</a>
           </li>
         </ul>
         <form class="d-flex">
           <div class="pe-2">
-            <a href="https://github.com/juliamauri/RedEye-Engine/releases/download/v5.0/RedEye.Engine.v5.0.zip"
+            <a href="https://github.com/RedEye-Systems/Legacy/releases/download/v5.0/RedEye.Engine.v5.0.zip"
               class="btn btn-primary btn-sm" role="button">Download</a>
           </div>
-          <a href="https://github.com/juliamauri/RedEye-Engine" class="btn btn-secondary btn-sm" role="button">Source
+          <a href="https://github.com/RedEye-Systems/Legacy" class="btn btn-secondary btn-sm" role="button">Source
             Code</a>
         </form>
       </div>
@@ -128,7 +128,7 @@
         2018 that held basic modules for starting and closing a blank window. After developing features continuously, we
         now even have our own particle pipeline system implemented. For further documentation on how the engine was
         built and works, feel free to check the repository’s <a
-          href="https://github.com/juliamauri/RedEye-Engine/wiki/Release-Version-Notes">wiki</a>
+          href="https://github.com/RedEye-Systems/Legacy/wiki/Release-Version-Notes">wiki</a>
         section.</p>
     </div>
   </div>
@@ -157,23 +157,23 @@
           <p>&#9642; <strong>Window</strong>: Uses SDL Window subsystem to request a single window. We intend to expand
             its use to several windows at a later stage to allow for easier editor tabs organization.</p>
           <p>&#9642; <strong>Scene</strong>: Holds the ECS (Entity-Component System) and complementary systems to manage
-            it more efficiently. The <a href="https://www.redeye-engine.es/The-Entrails/#SceneOptimization">Scene
+            it more efficiently. The <a href="https://legacy.redeye-engine.es/The-Entrails/#SceneOptimization">Scene
               Optimization</a> section digs deeper into how they operate.</p>
           <p>&#9642; <strong>Physics</strong>: Latest module addition for building the new pipeline. It was envisioned
             to hold other physical entities apart from particles. The other planned features can be found listed at the
-            <a href="https://www.redeye-engine.es/Whats-Next/">What's Next?</a> page.
+            <a href="https://legacy.redeye-engine.es/Whats-Next/">What's Next?</a> page.
           </p>
           <p>&#9642; <strong>Editor</strong>: Powered by ImGUI, the editor module handles the user interface and lets us
             navigate, use and customize all the engine’s systems. It holds all the available menus and allows resizing,
             repositioning and docking them for a custom setup. Modules and some other classes have a DrawEditor function
             to portray data structures to the user interface. Check the <a
-              href="https://www.redeye-engine.es/The-Entrails/#UserInterface">User Interface</a> section for an overview
+              href="https://legacy.redeye-engine.es/The-Entrails/#UserInterface">User Interface</a> section for an overview
             of the different editor windows.</p>
           <p>&#9642; <strong>Renderer</strong>: Uses OpenGL to communicate with the GPU and draw scenes. It has numerous
             ways to customize how the scenes are displayed for each different viewport used: game, editor and particles.
             Toggle debug drawing options, light modes and other rendering flags. For a more detailed overview on how the
             different elements are drawn, check the <a
-              href="https://www.redeye-engine.es/The-Entrails/#ShaderPipeline">Shader Pipeline</a> section.</p>
+              href="https://legacy.redeye-engine.es/The-Entrails/#ShaderPipeline">Shader Pipeline</a> section.</p>
           <p>&#9642; <strong>Audio</strong>: Using Wwise, the engine can load and playback audio files. This powerful
             library is implemented scarcely as we wish to expand its use when setting up the scripting system and allow
             users to fully apply the audio engine’s features.</p>
@@ -187,7 +187,7 @@
             Update-less systems contained within App include code for hardware detection, the console and file system.
             The console counts with options to filter logs based on their type or file source. Scene and resource
             loading are described in the <a
-              href="https://www.redeye-engine.es/The-Entrails/#ResourceManagement">Resource Managemen</a> section.
+              href="https://legacy.redeye-engine.es/The-Entrails/#ResourceManagement">Resource Managemen</a> section.
           </p>
         </div>
       </div>
@@ -440,7 +440,7 @@
             up directly from the repository. To build the site’s elements, we used
             <a href="https://getbootstrap.com/">Bootstrap</a>’s front-end open source toolkit. Find out how the code
             ended at the
-            <a href="https://github.com/juliamauri/RedEye-Engine/tree/master/docs">docs folder</a>.
+            <a href="https://github.com/RedEye-Systems/Legacy/tree/master/docs">docs folder</a>.
           </p>
           <p>Image</p>
         </div>

@@ -7,4 +7,4 @@ Allow: /
 User-agent: *
 Disallow: /
 
-Sitemap: https://www.redeye-engine.es/sitemap.xml
+Sitemap: https://legacy.redeye-engine.es/sitemap.xml
