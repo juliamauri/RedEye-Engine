@@ -11,7 +11,7 @@ May this repository serve as a stepping stone to building crazier ideas and havi
 * Github Repository: https://github.com/RedEye-Systems/Legacy
 * Webpage: https://legacy.redeye-engine.es/
 * Authors: [Julià Mauri Costa](https://github.com/juliamauri) & [Rubén Sardón](https://github.com/cumus)
-* License: [GNU General Public License v3.0](https://github.com/juliamauri/RedEye-Engine/blob/master/LICENSE)
+* License: [GNU General Public License v3.0](https://github.com/RedEye-Systems/Legacy/blob/main/LICENSE)
 
 ## User Actions
 ### Shortcuts
