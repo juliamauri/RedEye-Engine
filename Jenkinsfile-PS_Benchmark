@@ -14,7 +14,7 @@ pipeline {
         
         stage('Git Download') {
             steps {
-                git branch: "Cleanup-II", url: 'https://github.com/juliamauri/RedEye-Engine.git'
+                git branch: "Cleanup-II", url: 'https://github.com/RedEye-Systems/Legacy.git'
                 
                 bat 'xcopy "RedEye\\ReleaseData\\*.*" "RedEye\\Build\\"'
             }

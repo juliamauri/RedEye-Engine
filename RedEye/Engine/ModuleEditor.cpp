@@ -312,11 +312,11 @@ void ModuleEditor::Update()
 				if (ImGui::MenuItem(show_demo ? "Close Gui Demo" : "Open Gui Demo"))
 					show_demo = !show_demo;
 				if (ImGui::MenuItem("Documentation"))
-					BROWSER("https://github.com/juliamauri/RedEye-Engine/wiki");
+					BROWSER("https://github.com/RedEye-Systems/Legacy/wiki");
 				if (ImGui::MenuItem("Download Latest"))
-					BROWSER("https://github.com/juliamauri/RedEye-Engine/releases");
+					BROWSER("https://github.com/RedEye-Systems/Legacy/releases");
 				if (ImGui::MenuItem("Report a Bug"))
-					BROWSER("https://github.com/juliamauri/RedEye-Engine/issues");
+					BROWSER("https://github.com/RedEye-Systems/Legacy/issues");
 				if (ImGui::MenuItem("About", about->IsActive() ? "Hide" : "Open"))
 					about->ToggleActive();
 
