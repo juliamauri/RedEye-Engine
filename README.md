@@ -7,8 +7,8 @@ On brainstorming our next steps we find it hard to say goodbye to our engine's f
 May this repository serve as a stepping stone to building crazier ideas and having fun throughout.
 
 ## Links:
-* Organization [RedEye Systems](https://github.com/RedEye-Systems)
-* Repository [Github](https://github.com/juliamauri/RedEye-Engine)
+* Oeganization: https://github.com/RedEye-Systems
+* Github Repository: https://github.com/RedEye-Systems/Legacy
 * Webpage: https://legacy.redeye-engine.es/
 * Authors: [Julià Mauri Costa](https://github.com/juliamauri) & [Rubén Sardón](https://github.com/cumus)
 * License: [GNU General Public License v3.0](https://github.com/juliamauri/RedEye-Engine/blob/master/LICENSE)
@@ -214,9 +214,9 @@ Physics module supports running particle simulations inside a Particle Manager. 
     * Added new audio module panel which to send calls to Wwise.
 * Added internal custom profiling. Key method calls are recorded when starting profiling session. Session may be paused and resumed later on. Having recorded at least a method displays a button to save session to file and another to clear them.
 * Current WIP issues:
-    * [Thumbnail camera not positioning correctly for rendered icons](https://github.com/juliamauri/RedEye-Engine/issues/3)
-    * [Primitive's AABBs do not enclose geometry](https://github.com/juliamauri/RedEye-Engine/issues/2)
-    * [Thumbnail not rendering models and crashing](https://github.com/juliamauri/RedEye-Engine/issues/1)
+    * [Thumbnail camera not positioning correctly for rendered icons](https://github.com/RedEye-Systems/Legacy/issues/3)
+    * [Primitive's AABBs do not enclose geometry](https://github.com/RedEye-Systems/Legacy/issues/2)
+    * [Thumbnail not rendering models and crashing](https://github.com/RedEye-Systems/Legacy/issues/1)
 
 ### Release v3.2
 * Added and implemented **EASTL** and EA libraries' dependencies. Good bye STD.
@@ -252,6 +252,3 @@ Physics module supports running particle simulations inside a Particle Manager. 
 * Added **Camera Aspect Ratio**. Options include: Fit Window, Square 1x1, Traditional TV 4x3, Movietone 16x9 and Personalized. Personalized aspect ratio allows user to freely set camera's aspect ratio. Window resize adapts camera and viewport.
 * Added Event System. Used to dynamically control scene game objects and make calls between managers/modules/importers...
 * Added **Skybox**.
-    
-##
-![University Logo](https://www.citm.upc.edu/templates/new/img/logoCITM.png?1401879059)    
