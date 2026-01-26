@@ -1,4 +1,4 @@
-# ![logo](https://raw.githubusercontent.com/juliamauri/RedEye-Engine/refs/heads/main/docs/Multimedia/favicon-32x32.png) Red Eye Engine
+# ![logo](https://raw.githubusercontent.com/juliamauri/RedEye-Engine/refs/heads/main/docs/Multimedia/favicon-32x32.png) RedEye Legacy Engine
 
 Red Eye is a 3D Game Engine written mostly from scratch. It loads and renders geometry.
 Our future plans included adding new rendering systems, supporting Linux and updating to newer C++ utilities. The weaknesses in the engine's architecture started to show when facing these challenges.
